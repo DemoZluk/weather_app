@@ -9,5 +9,11 @@ INSTALLED_APPS = [
   'django.contrib.sessions',
   'django.contrib.messages',
   'django.contrib.staticfiles',
-  'rest_framework'
+  'rest_framework',
+  'weather',
 ]
+
+LANGUAGE_CODE = 'ru-ru'
+
+TIME_ZONE = 'Europe/Moscow'
+
