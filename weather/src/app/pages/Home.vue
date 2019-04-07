@@ -74,7 +74,10 @@
 
 <script>
   export default {
-    name: "Home"
+    name: "Home",
+    mounted() {
+      console.log(this.$store.state.test);
+    }
   }
 </script>
 
@@ -87,6 +90,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    cursor: default;
 
     .home-header {
       .city-name {
