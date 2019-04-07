@@ -35,4 +35,3 @@ LANGUAGE_CODE = 'ru-ru'
 TIME_ZONE = 'Europe/Moscow'
 
 OWM_API_KEY = '91d190097aabba8262c5bc22d2167007'
-OWM_DEFAULT_UNITS = 'metric'

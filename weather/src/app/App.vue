@@ -1,6 +1,7 @@
 <template>
   <main>
-    <home></home>
+    <div class="splash-screen" v-if="loading"></div>
+    <home v-else></home>
   </main>
 </template>
 
@@ -14,6 +15,14 @@
   export default {
     name: "app",
     components: {Home},
+    computed: {
+      loading() {
+        return this.$store.state.loading
+      }
+    },
+    beforeMount() {
+      this.$store.dispatch('fetchWeatherData')
+    }
   }
 </script>
 
@@ -22,5 +31,15 @@
   main {
     height: 100%;
     width: 100%;
+  }
+
+  .splash-screen {
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    background: #498CEC;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 </style>

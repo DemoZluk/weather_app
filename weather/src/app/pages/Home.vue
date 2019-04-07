@@ -3,10 +3,20 @@
     <header class="home-header">
       <div uk-grid class="city uk-child-width-1-2">
         <span class="city-name">
-          {{ weatherData.name }}
+          <!--
+          Сервис openweathermap не предоставляет русскоязычное название,
+          а извлечение русскоязычного названия из онлайн-источника занимает много времени.
+          Можно сделать свою базу на сервере для хранения всех доступных городов,
+          но в данном проекте это будет лишнее поскольку размер базы будет очень большим.
+          Поэтому ограничимся заранее ограниченным списком городов.
+          -->
+          {{ getLocalizedName(weatherData.name) }}
         </span>
         <div class="temperature-unit-switch uk-flex uk-flex-right">
-          <div>[C | F]</div>
+          <div class="switch">
+            <span class="metric selected" @click="getWeather({units: 'metric'})">&deg;C</span>
+            <span class="imperial" @click="getWeather({units: 'imperial'})">&deg;F</span>
+          </div>
         </div>
       </div>
       <div class="city-select uk-flex">
@@ -30,7 +40,7 @@
     <section class="home-main">
       <div class="temperature">
         <div class="temperature-icon"><i class="wi" :class="conditionIcons[weatherData.weather[0].main]"></i></div>
-        <div class="temperature-text">{{ Math.round(weatherData.main.temp) }}&deg;</div>
+        <div class="temperature-text">{{ Math.round(weatherData.main.temp || 0) }}&deg;</div>
       </div>
       <div class="weather-condition">{{ weatherData.weather[0].description }}</div>
     </section>
@@ -42,7 +52,7 @@
           </span>
           <div class="value">
             <span class="wind-speed">
-              {{ weatherData.wind.speed }} м/с,
+              {{ weatherData.wind.speed }},
             </span>
             <span class="wind-direction">
               <i class="wi wi-wind-direction" :style="`transform: rotate(${weatherData.wind.deg}deg);`"></i>
@@ -54,7 +64,7 @@
             Давление
           </span>
           <div class="value">
-            {{ Math.round(weatherData.main.pressure * 0.750062) }} мм рт. ст.
+            {{ weatherData.main.pressure }}
           </div>
         </div>
         <div class="humidity">
@@ -73,7 +83,7 @@
             Видимость
           </span>
           <div class="value">
-            {{ Math.round(weatherData.visibility / 100) / 10 }} км.
+            {{ weatherData.visibility }} км.
           </div>
         </div>
       </div>
@@ -86,9 +96,13 @@
     name: "Home",
     data() {
       return {
+        loading: true,
         conditionIcons: {
           Clear: 'wi-day-sunny',
-
+        },
+        cityNames: {
+          'Moscow': 'Москва',
+          'Krasnodar': 'Краснодар',
         }
       }
     },
@@ -98,12 +112,16 @@
       }
     },
     methods: {
-      showData() {
-        console.log(this.$store.state.weatherData.weather);
+      getLocalizedName(name) {
+        return this.cityNames[name] || name
+      },
+      getWeather({ city, units }) {
+        this.$store.dispatch('fetchWeatherData', {city: city, units: units})
       }
     },
-    mounted() {
+    created() {
       this.$store.dispatch('fetchWeatherData')
+        .then(() => this.loading = false)
     }
   }
 </script>
@@ -173,6 +191,21 @@
     }
   }
 
+  .temperature-unit-switch .switch {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 1.5rem;
+    border-radius: 0.3rem;
+    border: 0.05rem solid;
+    
+    & > span {
+      width: 2.2rem;
+      text-align: center;
+      cursor: pointer;
+    }
+  }
+
   .w-label {
     font-size: 0.8rem;
     opacity: 0.6;
@@ -184,6 +217,19 @@
 
     .temperature-icon {
       color: #FFF9AE;
+    }
+
+    .temperature-unit-switch .switch {
+      border-color: rgba(228, 228, 228, 0.15);
+
+      & > span {
+        color: rgba(228, 228, 228, 0.6);
+      }
+
+      .selected {
+        color: #FFF;
+        background-color: rgba(228, 228, 228, 0.2);
+      }
     }
   }
 </style>

@@ -7,7 +7,12 @@ Vue.use(Vuex);
 
 const store = new Vuex.Store({
   state: {
-    weatherData: {}
+    loading: true,
+    weatherData: {
+      main: {},
+      weather: [{}],
+      wind: {},
+    }
   },
 
   mutations: {
@@ -17,17 +22,25 @@ const store = new Vuex.Store({
   },
 
   actions: {
-    fetchWeatherData(context) {
-      axios.get('/api/v1/get_weather?format=json&city_name=Krasnodar')
+    fetchWeatherData(context, options={}) {
+      let url = '/api/v1/get_weather?format=json';
+      if (options.city !== undefined) {
+        url += '&city_name=' + options.city
+      }
+      if (options.units !== undefined) {
+        url += '&units=' + options.units
+      }
+
+      axios.get(url)
         .then(response => {
-          console.log(response.data);
           if (response.data.cod === 200) {
             context.commit('updateWeather', response.data)
           } else {
             console.error(response.data.cod, response.data.message);
           }
         })
-        .catch(e => console.error(e));
+        .catch(e => console.error(e))
+        .finally(() => context.state.loading = false);
     }
   }
 });
