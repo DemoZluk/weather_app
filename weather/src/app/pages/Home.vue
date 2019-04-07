@@ -3,7 +3,7 @@
     <header class="home-header">
       <div uk-grid class="city uk-child-width-1-2">
         <span class="city-name">
-          Omsk
+          {{ weatherData.name }}
         </span>
         <div class="temperature-unit-switch uk-flex uk-flex-right">
           <div>[C | F]</div>
@@ -12,6 +12,7 @@
       <div class="city-select uk-flex">
         <div uk-form-custom="target: true" class="change-city">
           <select>
+            <option value="">Сменить город</option>
             <option value="1">Option 01</option>
             <option value="2">Option 02</option>
             <option value="3">Option 03</option>
@@ -28,43 +29,51 @@
     </header>
     <section class="home-main">
       <div class="temperature">
-        <div class="temperature-icon"><i class="wi wi-day-sunny"></i></div>
-        <div class="temperature-text">+19&deg;</div>
+        <div class="temperature-icon"><i class="wi" :class="conditionIcons[weatherData.weather[0].main]"></i></div>
+        <div class="temperature-text">{{ Math.round(weatherData.main.temp) }}&deg;</div>
       </div>
-      <div class="weather-condition">Clear</div>
+      <div class="weather-condition">{{ weatherData.weather[0].description }}</div>
     </section>
     <footer class="home-footer">
       <div uk-grid class="weather-data uk-child-width-1-2 uk-child-width-1-4@s">
         <div class="wind">
           <span class="w-label">
-            Wind
+            Ветер
           </span>
           <div class="value">
-            Wind
+            <span class="wind-speed">
+              {{ weatherData.wind.speed }} м/с,
+            </span>
+            <span class="wind-direction">
+              <i class="wi wi-wind-direction" :style="`transform: rotate(${weatherData.wind.deg}deg);`"></i>
+            </span>
           </div>
         </div>
         <div class="pressure">
           <span class="w-label">
-            Pressure
+            Давление
           </span>
           <div class="value">
-            Pressure
+            {{ Math.round(weatherData.main.pressure * 0.750062) }} мм рт. ст.
           </div>
         </div>
         <div class="humidity">
           <span class="w-label">
-            Humidity
+            Влажность
           </span>
           <div class="value">
-            Humidity
+            {{ weatherData.main.humidity }}%
           </div>
         </div>
         <div class="precipitation">
+          <!-- Данные по вероятности дождя openweathermap больше не предосталяет
+          https://openweathermap.desk.com/customer/portal/questions/17457140-forecast-precipitation
+           -->
           <span class="w-label">
-            Precipitation
+            Видимость
           </span>
           <div class="value">
-            Precipitation
+            {{ Math.round(weatherData.visibility / 100) / 10 }} км.
           </div>
         </div>
       </div>
@@ -75,8 +84,26 @@
 <script>
   export default {
     name: "Home",
+    data() {
+      return {
+        conditionIcons: {
+          Clear: 'wi-day-sunny',
+
+        }
+      }
+    },
+    computed: {
+      weatherData() {
+        return this.$store.state.weatherData
+      }
+    },
+    methods: {
+      showData() {
+        console.log(this.$store.state.weatherData.weather);
+      }
+    },
     mounted() {
-      console.log(this.$store.state.test);
+      this.$store.dispatch('fetchWeatherData')
     }
   }
 </script>
@@ -123,6 +150,10 @@
       .temperature-text {
         font-size: 5rem;
       }
+
+      .weather-condition {
+        text-transform: capitalize;
+      }
     }
 
     .home-footer {
@@ -132,6 +163,12 @@
         .value {
           margin-top: 0.2rem;
         }
+      }
+
+      .wind-direction > i {
+        font-size: 1.2rem;
+        line-height: 1rem;
+        vertical-align: middle;
       }
     }
   }
