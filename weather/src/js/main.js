@@ -15,6 +15,9 @@ const vm = new Vue({
   components: {
     App
   },
+  beforeMount() {
+    store.dispatch('fetchWeatherData')
+  }
 });
 
 export default vm

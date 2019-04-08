@@ -7,6 +7,7 @@ from weather_test.settings import OWM_API_KEY
 
 class City:
   BASE_URL = 'https://api.openweathermap.org/data/2.5/'
+  DEFAULT_CITY = 'Moscow'
   OWM_DEFAULT_UNITS = 'metric'
   UNITS = {
     'metric': {
@@ -38,7 +39,7 @@ class City:
         city = geo.city(user_ip)
         city_name = ','.join([city.get('city'), city.get('country_code')])
       except AddressNotFoundError:
-        city_name = 'Moscow'
+        city_name = self.DEFAULT_CITY
 
     units = request.GET.get('units', self.OWM_DEFAULT_UNITS)
     url = f'{self.BASE_URL}weather?q={city_name}&units={units}&lang=ru&appid={OWM_API_KEY}'

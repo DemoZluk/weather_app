@@ -20,9 +20,6 @@
         return this.$store.state.loading
       }
     },
-    beforeMount() {
-      this.$store.dispatch('fetchWeatherData')
-    }
   }
 </script>
 

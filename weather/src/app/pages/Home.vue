@@ -1,8 +1,8 @@
 <template>
   <div class="theme--clear content">
     <header class="home-header">
-      <div uk-grid class="city uk-child-width-1-2">
-        <span class="city-name">
+      <div uk-grid class="city">
+        <span class="city-name uk-width-5-6">
           <!--
           Сервис openweathermap не предоставляет русскоязычное название,
           а извлечение русскоязычного названия из онлайн-источника занимает много времени.
@@ -12,27 +12,31 @@
           -->
           {{ getLocalizedName(weatherData.name) }}
         </span>
-        <div class="temperature-unit-switch uk-flex uk-flex-right">
+        <div class="temperature-unit-switch uk-flex uk-flex-right uk-width-1-6">
           <div class="switch">
-            <span class="metric selected" @click="getWeather({units: 'metric'})">&deg;C</span>
-            <span class="imperial" @click="getWeather({units: 'imperial'})">&deg;F</span>
+            <span
+                class="metric"
+                :class="currentUnits === 'metric' ? 'selected' : ''"
+                @click="getWeather({units: 'metric'})"
+            >&deg;C</span>
+            <span
+                class="imperial"
+                :class="currentUnits === 'imperial' ? 'selected' : ''"
+                @click="getWeather({units: 'imperial'})"
+            >&deg;F</span>
           </div>
         </div>
       </div>
       <div class="city-select uk-flex">
         <div uk-form-custom="target: true" class="change-city">
-          <select>
-            <option value="">Сменить город</option>
-            <option value="1">Option 01</option>
-            <option value="2">Option 02</option>
-            <option value="3">Option 03</option>
-            <option value="4">Option 04</option>
+          <select v-model="currentCity">
+            <option v-for="(value, key) in cityNames" :value="key" :key="key">{{ value }}</option>
           </select>
-          <span class="w-label">Change city</span>
+          <span class="w-label">Сменить город</span>
         </div>
         <div class="my-location">
-          <span class="w-label">
-            My location
+          <span class="w-label" @click="resetWeather">
+            Моё местоположение
           </span>
         </div>
       </div>
@@ -92,23 +96,36 @@
 </template>
 
 <script>
+  import Cookie from 'js-cookie'
+
   export default {
     name: "Home",
     data() {
       return {
         loading: true,
+        currentUnits: 'metric',
         conditionIcons: {
           Clear: 'wi-day-sunny',
         },
         cityNames: {
           'Moscow': 'Москва',
           'Krasnodar': 'Краснодар',
-        }
+          'Omsk': 'Омск',
+          'Petropavlovsk-Kamchatsky': 'Петропавловск-Камчатский'
+        },
       }
     },
     computed: {
       weatherData() {
         return this.$store.state.weatherData
+      },
+      currentCity: {
+        get() {
+          return this.$store.state.currentCity || Cookie.get('currentCity') || 'Moscow'
+        },
+        set(value) {
+          this.$store.dispatch('fetchWeatherData', {city: value})
+        }
       }
     },
     methods: {
@@ -116,12 +133,19 @@
         return this.cityNames[name] || name
       },
       getWeather({ city, units }) {
-        this.$store.dispatch('fetchWeatherData', {city: city, units: units})
+        if (units) {
+          this.currentUnits = units;
+        }
+        this.$store.dispatch('fetchWeatherData', {city: city, units: this.currentUnits});
+      },
+      resetWeather() {
+        Cookie.remove('currentCity');
+        this.$store.dispatch('fetchWeatherData')
       }
     },
     created() {
       this.$store.dispatch('fetchWeatherData')
-        .then(() => this.loading = false)
+        .then(() => this.loading = false);
     }
   }
 </script>
