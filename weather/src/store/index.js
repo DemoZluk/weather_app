@@ -35,17 +35,15 @@ const store = new Vuex.Store({
   },
 
   actions: {
-    fetchWeatherData(context, options = {}) {
+    fetchWeatherData(context, { city=Cookie.get('currentCity'), units=Cookie.get('currentUnits') } = {}) {
       let url = '/api/v1/get_weather?format=json';
 
-      options.city = options.city || Cookie.get('currentCity');
-      if (options.city !== undefined) {
-        url += '&city_name=' + options.city
+      if (city !== undefined) {
+        url += '&city_name=' + city
       }
 
-      options.units = options.units || Cookie.get('currentUnits');
-      if (options.units !== undefined) {
-        url += '&units=' + options.units
+      if (units !== undefined) {
+        url += '&units=' + units
       }
 
       axios.get(url)
@@ -53,8 +51,8 @@ const store = new Vuex.Store({
           if (response.data.cod === 200) {
             context.dispatch('setCurrentCity', response.data.name);
 
-            if (options.units !== undefined) {
-              context.dispatch('setCurrentUnits', options.units)
+            if (units !== undefined) {
+              context.dispatch('setCurrentUnits', units)
             }
 
             context.commit('updateWeather', response.data)

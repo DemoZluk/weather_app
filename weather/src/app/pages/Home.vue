@@ -1,5 +1,5 @@
 <template>
-  <div class="theme--clear content">
+  <div class="content" :class="'theme--' + weatherData.weather[0].main.toLowerCase()">
     <header class="home-header">
       <div uk-grid class="city">
         <span class="city-name uk-width-5-6">
@@ -17,25 +17,25 @@
             <span
                 class="metric"
                 :class="currentUnits === 'metric' ? 'selected' : ''"
-                @click="getWeather({units: 'metric'})"
+                @click="currentUnits = 'metric'"
             >&deg;C</span>
             <span
                 class="imperial"
                 :class="currentUnits === 'imperial' ? 'selected' : ''"
-                @click="getWeather({units: 'imperial'})"
+                @click="currentUnits = 'imperial'"
             >&deg;F</span>
           </div>
         </div>
       </div>
       <div class="city-select uk-flex">
-        <div uk-form-custom="target: true" class="change-city">
-          <select v-model="currentCity">
-            <option v-for="(value, key) in cityNames" :value="key" :key="key">{{ value }}</option>
-          </select>
-          <span class="w-label">Сменить город</span>
+        <button class="w-label" type="button">Сменить город</button>
+        <div uk-dropdown>
+          <ul class="uk-nav uk-dropdown-nav">
+            <li v-for="(value, key) in cityNames" :key="key" @click="currentCity = key"><a>{{ value }}</a></li>
+          </ul>
         </div>
         <div class="my-location">
-          <span class="w-label" @click="resetWeather">
+          <span class="w-label" style="cursor: pointer;" @click="resetWeather">
             Моё местоположение
           </span>
         </div>
@@ -79,7 +79,7 @@
             {{ weatherData.main.humidity }}%
           </div>
         </div>
-        <div class="precipitation">
+        <div class="visibility">
           <!-- Данные по вероятности дождя openweathermap больше не предосталяет
           https://openweathermap.desk.com/customer/portal/questions/17457140-forecast-precipitation
            -->
@@ -103,9 +103,10 @@
     data() {
       return {
         loading: true,
-        currentUnits: 'metric',
         conditionIcons: {
           Clear: 'wi-day-sunny',
+          Rain: 'wi-rain',
+          Clouds: 'wi-cloudy',
         },
         cityNames: {
           'Moscow': 'Москва',
@@ -124,7 +125,19 @@
           return this.$store.state.currentCity || Cookie.get('currentCity') || 'Moscow'
         },
         set(value) {
-          this.$store.dispatch('fetchWeatherData', {city: value})
+          if (Cookie.get('currentCity') !== value) {
+            this.$store.dispatch('fetchWeatherData', {city: value})
+          }
+        }
+      },
+      currentUnits: {
+        get() {
+          return this.$store.state.currentUnits || Cookie.get('currentUnits') || 'metric'
+        },
+        set(value) {
+          if (Cookie.get('currentUnits') !== value) {
+            this.$store.dispatch('fetchWeatherData', {units: value})
+          }
         }
       }
     },
@@ -132,16 +145,10 @@
       getLocalizedName(name) {
         return this.cityNames[name] || name
       },
-      getWeather({ city, units }) {
-        if (units) {
-          this.currentUnits = units;
-        }
-        this.$store.dispatch('fetchWeatherData', {city: city, units: this.currentUnits});
-      },
       resetWeather() {
         Cookie.remove('currentCity');
         this.$store.dispatch('fetchWeatherData')
-      }
+      },
     },
     created() {
       this.$store.dispatch('fetchWeatherData')
@@ -151,6 +158,8 @@
 </script>
 
 <style lang="scss" scoped>
+  @import "@/styles/home-themes.scss";
+
   .content {
     height: 100vh;
     min-width: 100%;
@@ -222,6 +231,7 @@
     height: 1.5rem;
     border-radius: 0.3rem;
     border: 0.05rem solid;
+    overflow: hidden;
     
     & > span {
       width: 2.2rem;
@@ -233,27 +243,8 @@
   .w-label {
     font-size: 0.8rem;
     opacity: 0.6;
-  }
-  
-  .theme--clear.content {
-    background-color: #498CEC;
-    color: #FFF;
-
-    .temperature-icon {
-      color: #FFF9AE;
-    }
-
-    .temperature-unit-switch .switch {
-      border-color: rgba(228, 228, 228, 0.15);
-
-      & > span {
-        color: rgba(228, 228, 228, 0.6);
-      }
-
-      .selected {
-        color: #FFF;
-        background-color: rgba(228, 228, 228, 0.2);
-      }
-    }
+    background: none;
+    border: none;
+    color: inherit;
   }
 </style>
