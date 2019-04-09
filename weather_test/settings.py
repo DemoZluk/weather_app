@@ -39,3 +39,7 @@ OWM_API_KEY = '91d190097aabba8262c5bc22d2167007'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'weather/static/')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+GEOIP_PATH = os.environ['GEOIP_GEOLITE2_PATH']
+GEOIP_CITY = os.environ['GEOIP_GEOLITE2_CITY_FILENAME']
+GEOIP_COUNTRY = os.environ['GEOIP_GEOLITE2_COUNTRY_FILENAME']
