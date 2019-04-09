@@ -1,7 +1,13 @@
+import os
+from wsgiref.util import FileWrapper
+
 from django import views
 from django.contrib.gis.geoip2 import GeoIP2
+from django.http import FileResponse, Http404
 from django.shortcuts import render
 from geoip2.errors import AddressNotFoundError
+
+from weather_test.settings_default import BASE_DIR
 
 
 class MainPageView(views.View):
@@ -18,3 +24,9 @@ class MainPageView(views.View):
       city = False
 
     return render(request, 'weather/pages/main.html', {'ip': user_ip, 'city': city})
+
+
+def fonts_resolver(request, name):
+  file = open(os.path.join(BASE_DIR, 'weather/static/weather/bundles/font/') + name, 'rb')
+  response = FileResponse(file, content_type='octet-stream')
+  return response

@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,6 +6,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Weather App</title>
+  <link rel="stylesheet" href="{% static 'weather/bundles/css/vendors.css' %}">
+  <link rel="stylesheet" href="{% static 'weather/bundles/css/main.css' %}">
 </head>
 
 <body>
@@ -13,6 +16,9 @@
       <app></app>
   {% endblock %}
 </div>
+<script src="{% static 'weather/bundles/vendors.js' %}"></script>
+<script src="{% static 'weather/bundles/runtime.js' %}"></script>
+<script src="{% static 'weather/bundles/main.js' %}"></script>
 </body>
 
 </html>

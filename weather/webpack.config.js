@@ -1,69 +1,97 @@
 const webpack = require('webpack');
 const path = require('path');
 
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 module.exports = {
-	module: {
-		rules: [
-			{
-				include: [path.resolve(__dirname, 'src')],
-				loader: 'babel-loader',
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
 
-				options: {
-					plugins: ['syntax-dynamic-import'],
+        include: [path.resolve(__dirname, 'src')],
+        loader: 'babel-loader',
 
-					presets: [
-						[
-							'@babel/preset-env',
-							{
-								modules: false
-							}
-						]
-					]
-				},
+        options: {
+          plugins: ['syntax-dynamic-import'],
 
-				test: /\.js$/
-			},
-			{
-				test: /\.(scss|css)$/,
+          presets: [
+            [
+              '@babel/preset-env',
+              {
+                modules: false,
+                useBuiltIns: 'usage'
+              }
+            ]
+          ]
+        },
+      },
+      {
+        test: /\.s?css$/,
 
-				use: [
-					{
-						loader: 'style-loader'
-					},
-					{
-						loader: 'css-loader'
-					},
-					{
-						loader: 'sass-loader'
-					}
-				]
-			}
-		]
-	},
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          'sass-loader',
+        ]
+      },
+      {
+        test: /\.vue$/,
 
-	output: {
-		chunkFilename: '[name].[chunkhash].js',
-		filename: '[name].[chunkhash].js',
-		path: path.resolve(__dirname, 'static')
-	},
+        use: [
+          'vue-loader'
+        ]
+      },
+      {
+        test: /\.(woff(2)?|ttf|eot|svg)$/,
+        use: [{
+          loader: 'file-loader',
+          options: {
+            name: '[name].[ext]',
+            outputPath: 'font/'
+          }
+        }]
+      }
+    ]
+  },
 
-	mode: 'development',
+  entry: {
+    'main': './src/js/main.js'
+  },
 
-	optimization: {
-		splitChunks: {
-			cacheGroups: {
-				vendors: {
-					priority: -10,
-					test: /[\\/]node_modules[\\/]/
-				}
-			},
+  output: {
+    filename: '[name].js',
+    path: path.join(__dirname, 'static', 'weather', 'bundles')
+  },
 
-			chunks: 'async',
-			minChunks: 1,
-			minSize: 30000,
-			name: true
-		}
-	}
+  mode: 'production',
+
+  optimization: {
+    runtimeChunk: 'single',
+    splitChunks: {
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all'
+        },
+      },
+    }
+  },
+
+  resolve: {
+    alias: {
+      'vue$': 'vue/dist/vue.esm',
+      '@': path.resolve(__dirname, 'src'),
+    },
+    extensions: ['.vue', '.js', '.json'],
+  },
+  plugins: [
+    new VueLoaderPlugin(),
+    new MiniCssExtractPlugin({
+      filename: "css/[name].css",
+      chunkFilename: "css/[name].css"
+    }),
+  ],
 };
