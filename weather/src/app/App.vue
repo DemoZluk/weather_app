@@ -1,7 +1,9 @@
 <template>
   <main>
-    <div class="splash-screen" v-if="loading"></div>
-    <home v-else></home>
+    <home></home>
+    <div class="splash-screen" v-if="loading">
+      <div uk-spinner="ratio: 3" :style="{color: '#FFF'}"></div>
+    </div>
   </main>
 </template>
 

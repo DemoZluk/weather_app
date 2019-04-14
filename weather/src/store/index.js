@@ -38,6 +38,8 @@ const store = new Vuex.Store({
     fetchWeatherData(context, { city=Cookie.get('currentCity'), units=Cookie.get('currentUnits') } = {}) {
       let url = '/api/v1/get_weather?format=json';
 
+      context.state.loading = true;
+
       if (city !== undefined) {
         url += '&city_name=' + city
       }

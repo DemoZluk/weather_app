@@ -1,4 +1,4 @@
-### Weater app
+### Weather app
 
 Simple weather app using openweathermap.org API
 

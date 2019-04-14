@@ -2,7 +2,7 @@
   <div class="content" :class="'theme--' + weatherData.weather[0].main.toLowerCase()">
     <header class="home-header">
       <div uk-grid class="city">
-        <span class="city-name uk-width-5-6">
+        <span class="city-name uk-width-expand">
           <!--
           Сервис openweathermap не предоставляет русскоязычное название,
           а извлечение русскоязычного названия из онлайн-источника занимает много времени.
@@ -11,17 +11,18 @@
           Поэтому ограничимся заранее ограниченным списком городов.
           -->
           {{ getLocalizedName(weatherData.name) }}
+          <span uk-spinner v-if="loading"></span>
         </span>
-        <div class="temperature-unit-switch uk-flex uk-flex-right uk-width-1-6">
+        <div class="temperature-unit-switch uk-flex uk-flex-right uk-width-1-4 uk-width-1-6@m">
           <div class="switch">
             <span
                 class="metric"
-                :class="currentUnits === 'metric' ? 'selected' : ''"
+                :class="{selected: currentUnits === 'metric'}"
                 @click="currentUnits = 'metric'"
             >&deg;C</span>
             <span
                 class="imperial"
-                :class="currentUnits === 'imperial' ? 'selected' : ''"
+                :class="{selected: currentUnits === 'imperial'}"
                 @click="currentUnits = 'imperial'"
             >&deg;F</span>
           </div>
@@ -43,55 +44,57 @@
     </header>
     <section class="home-main">
       <div class="temperature">
-        <div class="temperature-icon"><i class="wi" :class="conditionIcons[weatherData.weather[0].main]"></i></div>
-        <div class="temperature-text">{{ Math.round(weatherData.main.temp || 0) }}&deg;</div>
+        <div class="temperature-wrapper">
+          <span class="temperature-icon"><i class="wi" :class="conditionIcons[weatherData.weather[0].main]"></i></span>
+          <span class="temperature-text">{{ Math.round(weatherData.main.temp || 0) }}&deg;</span>
+          <div class="weather-condition">{{ weatherData.weather[0].description }}</div>
+        </div>
       </div>
-      <div class="weather-condition">{{ weatherData.weather[0].description }}</div>
-    </section>
-    <footer class="home-footer">
-      <div uk-grid class="weather-data uk-child-width-1-2 uk-child-width-1-4@s">
-        <div class="wind">
+      <footer class="home-footer">
+        <div uk-grid class="weather-data uk-child-width-1-2 uk-child-width-1-4@s">
+          <div class="wind">
           <span class="w-label">
             Ветер
           </span>
-          <div class="value">
+            <div class="value">
             <span class="wind-speed">
               {{ weatherData.wind.speed }},
             </span>
-            <span class="wind-direction">
+              <span class="wind-direction">
               <i class="wi wi-wind-direction" :style="`transform: rotate(${weatherData.wind.deg}deg);`"></i>
             </span>
+            </div>
           </div>
-        </div>
-        <div class="pressure">
+          <div class="pressure">
           <span class="w-label">
             Давление
           </span>
-          <div class="value">
-            {{ weatherData.main.pressure }}
+            <div class="value">
+              {{ weatherData.main.pressure }}
+            </div>
           </div>
-        </div>
-        <div class="humidity">
+          <div class="humidity">
           <span class="w-label">
             Влажность
           </span>
-          <div class="value">
-            {{ weatherData.main.humidity }}%
+            <div class="value">
+              {{ weatherData.main.humidity }}%
+            </div>
           </div>
-        </div>
-        <div class="visibility">
-          <!-- Данные по вероятности дождя openweathermap больше не предосталяет
-          https://openweathermap.desk.com/customer/portal/questions/17457140-forecast-precipitation
-           -->
-          <span class="w-label">
+          <div class="visibility">
+            <!-- Данные по вероятности дождя openweathermap больше не предосталяет
+            https://openweathermap.desk.com/customer/portal/questions/17457140-forecast-precipitation
+             -->
+            <span class="w-label">
             Видимость
           </span>
-          <div class="value">
-            {{ weatherData.visibility }} км.
+            <div class="value">
+              {{ weatherData.visibility }} км.
+            </div>
           </div>
         </div>
-      </div>
-    </footer>
+      </footer>
+    </section>
   </div>
 </template>
 
@@ -102,7 +105,6 @@
     name: "Home",
     data() {
       return {
-        loading: true,
         conditionIcons: {
           Clear: 'wi-day-sunny',
           Rain: 'wi-rain',
@@ -112,7 +114,6 @@
           'Moscow': 'Москва',
           'Krasnodar': 'Краснодар',
           'Omsk': 'Омск',
-          'Petropavlovsk-Kamchatsky': 'Петропавловск-Камчатский'
         },
       }
     },
@@ -139,6 +140,9 @@
             this.$store.dispatch('fetchWeatherData', {units: value})
           }
         }
+      },
+      loading() {
+        return this.$store.state.loading
       }
     },
     methods: {
@@ -152,7 +156,6 @@
     },
     created() {
       this.$store.dispatch('fetchWeatherData')
-        .then(() => this.loading = false);
     }
   }
 </script>
@@ -184,13 +187,19 @@
 
     .home-main {
       display: flex;
+      flex-grow: 1;
       flex-direction: column;
       justify-content: center;
       align-items: center;
 
       .temperature {
+        flex-grow: 1;
         display: flex;
-        flex-direction: row;
+        align-items: center;
+      }
+
+      .temperature-wrapper {
+        white-space: nowrap;
       }
 
       .temperature-icon {
@@ -204,11 +213,13 @@
 
       .weather-condition {
         text-transform: capitalize;
+        text-align: center;
       }
     }
 
     .home-footer {
       margin-bottom: 2rem;
+      width: 100%;
 
       .weather-data {
         .value {
@@ -246,5 +257,33 @@
     background: none;
     border: none;
     color: inherit;
+  }
+
+  @media (max-width: 640px) and (orientation: landscape) {
+    .content {
+      padding: 1.5rem;
+
+      .home-main {
+        flex-direction: row;
+
+        .temperature {
+          margin-right: 2rem;
+        }
+
+        .temperature-icon {
+          font-size: 4rem;
+          margin-right: 1rem;
+        }
+
+        .temperature-text {
+          font-size: 4rem;
+        }
+      }
+
+      .home-footer {
+        margin-bottom: 0;
+        text-align: right;
+      }
+    }
   }
 </style>

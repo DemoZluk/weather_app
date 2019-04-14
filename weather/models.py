@@ -34,16 +34,12 @@ class City:
         user_ip = forwarded.split(',')[0]
       else:
         user_ip = request.META.get('REMOTE_ADDR')
-      print(user_ip)
       geo = GeoIP2()
       try:
         city = geo.city(user_ip)
-        print(city)
         city_name = ','.join([city.get('city'), city.get('country_code')])
       except AddressNotFoundError:
         city_name = self.DEFAULT_CITY
-
-    print(city_name)
 
     units = request.GET.get('units', self.OWM_DEFAULT_UNITS)
     url = f'{self.BASE_URL}weather?q={city_name}&units={units}&lang=ru&appid={OWM_API_KEY}'
